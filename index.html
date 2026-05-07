@@ -145,7 +145,6 @@
             font-size: 14px;
         }
 
-        /* RANKINGS - 2 COLUNAS */
         .rankings-container {
             display: flex;
             gap: 15px;
@@ -202,7 +201,6 @@
             font-size: 11px;
         }
 
-        /* LOGIN */
         .login-area {
             padding: 20px;
             background: white;
@@ -370,14 +368,12 @@
 </head>
 <body>
     <div class="game-container">
-        <!-- TELA DE LOGIN COM RANKING -->
         <div id="loginScreen">
             <div class="header">
                 <h1>🏆 DESAFIO DA TABUADA</h1>
                 <p>⚡ Responda rápido, acerte mais e entre para o TOP 10! ⚡</p>
             </div>
 
-            <!-- RANKINGS NA TELA DE LOGIN -->
             <div class="rankings-container">
                 <div class="ranking-box">
                     <h3>🌍 TOP 10 DA <span>ESCOLA</span> 🌍</h3>
@@ -393,7 +389,6 @@
                 </div>
             </div>
 
-            <!-- PAINEL DE RESET DO RANKING -->
             <div class="reset-panel">
                 <button onclick="toggleAdminPanel()" class="reset-btn">🔧 ADMIN - Resetar Ranking 🔧</button>
                 <div id="adminPanel" class="admin-panel hidden">
@@ -410,7 +405,6 @@
                 </div>
             </div>
 
-            <!-- ÁREA DE LOGIN -->
             <div class="login-area">
                 <div class="form-group">
                     <label>📚 Sua Turma / Sala</label>
@@ -438,7 +432,6 @@
             </div>
         </div>
 
-        <!-- TELA DO JOGO -->
         <div id="gameScreen" class="hidden">
             <div class="header">
                 <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
@@ -474,7 +467,6 @@
             </div>
         </div>
 
-        <!-- TELA GAME OVER -->
         <div id="gameOverScreen" class="hidden">
             <div class="game-over">
                 <div class="header" style="border-radius: 0">
@@ -490,7 +482,6 @@
     </div>
 
     <script>
-        // NOVO LINK DO APPS SCRIPT ATUALIZADO
         const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbz_D8hUJ-lKrsXca0AflIVJ_qo_Wa4oeeImsU7aNRqEU408NNUJIYmRoBRL8Pc-o5rj/exec';
 
         let jogador = {},
@@ -505,137 +496,119 @@
             temposRespostas = [],
             inicioPergunta = 0;
 
-        const temposNivel = {
-            1: 60,
-            2: 30,
-            3: 20,
-            4: 15,
-            5: 10
-        };
+        const temposNivel = { 1: 60, 2: 30, 3: 20, 4: 15, 5: 10 };
+        const SENHA_ADMIN = "admin123";
 
-        // ========== FUNÇÃO PARA CALCULAR TOP TURMAS ==========
         function calcularTopTurmas(dados) {
             const turmas = {};
-            
             dados.forEach(aluno => {
-                if (!turmas[aluno.turma]) {
-                    turmas[aluno.turma] = [];
-                }
+                if (!turmas[aluno.turma]) turmas[aluno.turma] = [];
                 turmas[aluno.turma].push(aluno.eficiencia);
             });
-            
             const rankingTurmas = [];
             for (const [turma, eficiencias] of Object.entries(turmas)) {
                 eficiencias.sort((a, b) => b - a);
                 const top5 = eficiencias.slice(0, 5);
                 const media = top5.reduce((a, b) => a + b, 0) / top5.length;
-                rankingTurmas.push({
-                    turma: turma,
-                    media: Math.round(media),
-                    totalAlunos: eficiencias.length,
-                    topAlunos: top5.length
-                });
+                rankingTurmas.push({ turma, media: Math.round(media), totalAlunos: eficiencias.length, topAlunos: top5.length });
             }
-            
             rankingTurmas.sort((a, b) => b.media - a.media);
             return rankingTurmas;
         }
 
-        // ========== RANKING GLOBAL ==========
         function exibirRankingGlobal(containerId, dados, isJogo = false) {
             const container = document.getElementById(containerId);
             if (!dados || !dados.length) {
-                container.innerHTML = '<p style="text-align:center;padding:20px;">🌍 Nenhuma pontuação na escola!</p>';
+                container.innerHTML = '<p style="text-align:center;padding:20px;">🌍 Nenhuma pontuação na escola! Jogue e apareça aqui! 🎮</p>';
                 return;
             }
-            
             const dadosOrdenados = [...dados].sort((a, b) => b.eficiencia - a.eficiencia);
             let html = '<table class="ranking-table"><thead><tr><th>🏆</th><th>CÓDIGO</th><th>SALA</th><th>NÍVEL</th><th>%</th></tr></thead><tbody>';
-            
             dadosOrdenados.slice(0, 10).forEach((item, i) => {
                 const souEu = (isJogo && item.codigo === jogador.codigo);
                 let medalha = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`;
                 let cor = item.eficiencia >= 80 ? '#4CAF50' : item.eficiencia >= 50 ? '#FF9800' : '#f44336';
-                
                 html += `<tr style="${souEu ? 'background:#E3F2FD; font-weight:bold' : ''} ${i === 0 ? 'first-place' : ''}">
-                    <td style="text-align:center">${medalha}</td>
+                    <td>${medalha}</td>
                     <td><strong>${item.codigo}</strong>${souEu ? ' 📍' : ''}</td>
-                    <td><span class="badge-turma">${item.turma}</span></span></td>
-                    <td>${item.nivel}/5 ${'⭐'.repeat(item.nivel)}</span></td>
-                    <td style="color:${cor}; font-weight:bold">${item.eficiencia}%</span></td>
-                </table>`;
-            });
-            html += '</tbody></table>';
-            container.innerHTML = html;
-        }
-
-        // ========== RANKING TURMAS ==========
-        function exibirRankingTurmas(containerId, dados, isJogo = false) {
-            const container = document.getElementById(containerId);
-            const rankingTurmas = calcularTopTurmas(dados);
-            
-            if (!rankingTurmas.length) {
-                container.innerHTML = '<p style="text-align:center;padding:20px;">🏫 Nenhuma turma registrada!</p>';
-                return;
-            }
-            
-            let html = '<table class="ranking-table"><thead><tr><th>🏆</th><th>TURMA</th><th>MÉDIA</th><th>ALUNOS</th><th>TOP</th></tr></thead><tbody>';
-            
-            rankingTurmas.slice(0, 10).forEach((item, i) => {
-                let medalha = '';
-                if (i === 0) medalha = '🥇';
-                else if (i === 1) medalha = '🥈';
-                else if (i === 2) medalha = '🥉';
-                else medalha = `${i + 1}º`;
-                
-                let cor = item.media >= 80 ? '#4CAF50' : item.media >= 60 ? '#FF9800' : '#f44336';
-                let estrelas = item.media >= 90 ? '⭐⭐⭐' : item.media >= 75 ? '⭐⭐' : '⭐';
-                const destaque = (isJogo && item.turma === jogador.turma) ? 'background:#E3F2FD; font-weight:bold;' : '';
-                
-                html += `<tr style="${destaque} ${i === 0 ? 'first-place' : ''}">
-                    <td style="text-align:center; font-size:16px;">${medalha}</td>
-                    <td><strong>${item.turma}</strong>${(isJogo && item.turma === jogador.turma) ? ' 📍' : ''}</td>
-                    <td style="color:${cor}; font-weight:bold; font-size:14px;">${item.media}% ${estrelas}</td>
-                    <td>📊 ${item.totalAlunos}</td>
-                    <td>🏅 ${item.topAlunos}/5</span></td>
+                    <td><span class="badge-turma">${item.turma}</span></td>
+                    <td>${item.nivel}/5 ${'⭐'.repeat(item.nivel)}</td>
+                    <td style="color:${cor}; font-weight:bold">${item.eficiencia}%</td>
                 </tr>`;
             });
             html += '</tbody></table>';
             container.innerHTML = html;
         }
 
-        // ========== FUNÇÕES DE CARREGAMENTO ==========
+        function exibirRankingTurmas(containerId, dados, isJogo = false) {
+            const container = document.getElementById(containerId);
+            const rankingTurmas = calcularTopTurmas(dados);
+            if (!rankingTurmas.length) {
+                container.innerHTML = '<p style="text-align:center;padding:20px;">🏫 Nenhuma turma registrada! Seja o primeiro da sua turma! 🎯</p>';
+                return;
+            }
+            let html = '<table class="ranking-table"><thead><tr><th>🏆</th><th>TURMA</th><th>MÉDIA</th><th>ALUNOS</th><th>TOP</th></tr></thead><tbody>';
+            rankingTurmas.slice(0, 10).forEach((item, i) => {
+                let medalha = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`;
+                let cor = item.media >= 80 ? '#4CAF50' : item.media >= 60 ? '#FF9800' : '#f44336';
+                let estrelas = item.media >= 90 ? '⭐⭐⭐' : item.media >= 75 ? '⭐⭐' : '⭐';
+                const destaque = (isJogo && item.turma === jogador.turma) ? 'background:#E3F2FD; font-weight:bold;' : '';
+                html += `<tr style="${destaque} ${i === 0 ? 'first-place' : ''}">
+                    <td style="font-size:16px;">${medalha}</td>
+                    <td><strong>${item.turma}</strong>${(isJogo && item.turma === jogador.turma) ? ' 📍' : ''}</td>
+                    <td style="color:${cor}; font-weight:bold;">${item.media}% ${estrelas}</td>
+                    <td>📊 ${item.totalAlunos}</td>
+                    <td>🏅 ${item.topAlunos}/5</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
         async function carregarRankings() {
             try {
+                console.log('Carregando rankings...');
                 const resposta = await fetch(`${URL_APPS_SCRIPT}?acao=get`);
                 const dados = await resposta.json();
+                console.log('Dados recebidos:', dados);
                 
-                if (dados && dados.length) {
+                if (dados && dados.length > 0) {
                     exibirRankingGlobal('loginRankingGlobal', dados, false);
                     exibirRankingGlobal('rankingGlobalList', dados, true);
                     exibirRankingTurmas('loginRankingTurmas', dados, false);
                     exibirRankingTurmas('rankingTurmasList', dados, true);
                 } else {
-                    document.getElementById('loginRankingGlobal').innerHTML = '<p style="text-align:center;padding:20px;">🌍 Nenhuma pontuação ainda! Seja o primeiro!</p>';
-                    document.getElementById('loginRankingTurmas').innerHTML = '<p style="text-align:center;padding:20px;">🏫 Nenhuma turma registrada!</p>';
-                    document.getElementById('rankingGlobalList').innerHTML = '<p style="text-align:center;padding:20px;">🌍 Nenhuma pontuação ainda!</p>';
-                    document.getElementById('rankingTurmasList').innerHTML = '<p style="text-align:center;padding:20px;">🏫 Nenhuma turma registrada!</p>';
+                    const msgVazia = '<p style="text-align:center;padding:20px;">📢 Nenhuma pontuação ainda! Jogue e apareça no ranking! 🎮</p>';
+                    document.getElementById('loginRankingGlobal').innerHTML = msgVazia;
+                    document.getElementById('loginRankingTurmas').innerHTML = msgVazia;
+                    document.getElementById('rankingGlobalList').innerHTML = msgVazia;
+                    document.getElementById('rankingTurmasList').innerHTML = msgVazia;
                 }
             } catch (e) {
                 console.error('Erro ao carregar rankings:', e);
-                document.getElementById('loginRankingGlobal').innerHTML = '<p style="text-align:center;padding:20px;">⚠️ Erro de conexão! Verifique a URL do Apps Script.</p>';
-                document.getElementById('loginRankingTurmas').innerHTML = '<p style="text-align:center;padding:20px;">⚠️ Erro ao carregar rankings.</p>';
+                const erroMsg = '<p style="text-align:center;padding:20px;">⚠️ Erro de conexão! Verifique o Apps Script.</p>';
+                document.getElementById('loginRankingGlobal').innerHTML = erroMsg;
+                document.getElementById('loginRankingTurmas').innerHTML = erroMsg;
+                document.getElementById('rankingGlobalList').innerHTML = erroMsg;
+                document.getElementById('rankingTurmasList').innerHTML = erroMsg;
             }
         }
 
         async function salvarPontuacao(codigo, turma, nivel, eficiencia) {
             try {
-                await fetch(URL_APPS_SCRIPT, {
+                console.log('Salvando pontuação:', { codigo, turma, nivel, eficiencia });
+                const resposta = await fetch(URL_APPS_SCRIPT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ codigo, turma, nivel, eficiencia })
                 });
-                mostrarFeedback('✅ Pontuação salva! Rankings atualizados!', '#4CAF50');
+                const resultado = await resposta.json();
+                console.log('Resposta do salvamento:', resultado);
+                if (resultado.sucesso) {
+                    mostrarFeedback('✅ Pontuação salva!', '#4CAF50');
+                } else {
+                    mostrarFeedback('⚠️ Erro ao salvar: ' + (resultado.erro || 'desconhecido'), '#f44336');
+                }
                 await carregarRankings();
             } catch (e) {
                 console.error('Erro ao salvar:', e);
@@ -652,37 +625,27 @@
             setTimeout(() => d.remove(), 2000);
         }
 
-        // FUNÇÕES PARA RESET DO RANKING
-        const SENHA_ADMIN = "admin123";
-
         window.resetRanking = async function() {
-            if (!confirm('⚠️ ATENÇÃO! Isso irá apagar TODAS as pontuações de TODOS os jogadores! Esta ação é irreversível! ⚠️\n\nTem certeza que deseja continuar?')) {
-                return;
-            }
-            
-            const confirmacao = prompt('Digite "RESETAR" para confirmar o reset total do ranking:');
+            if (!confirm('⚠️ ATENÇÃO! Isso irá apagar TODAS as pontuações! ⚠️')) return;
+            const confirmacao = prompt('Digite "RESETAR" para confirmar:');
             if (confirmacao !== 'RESETAR') {
-                mostrarFeedback('❌ Reset cancelado - confirmação incorreta', '#f44336');
+                mostrarFeedback('❌ Reset cancelado', '#f44336');
                 return;
             }
-            
             try {
-                mostrarFeedback('🔄 Resetando ranking... Aguarde...', '#FF9800');
-                
+                mostrarFeedback('🔄 Resetando ranking...', '#FF9800');
                 const resposta = await fetch(`${URL_APPS_SCRIPT}?acao=reset&senha=${SENHA_ADMIN}`);
                 const resultado = await resposta.json();
-                
                 if (resultado.sucesso) {
                     mostrarFeedback('✅ Ranking resetado com sucesso!', '#4CAF50');
                     await carregarRankings();
                     document.getElementById('adminPanel').classList.add('hidden');
                     document.getElementById('resetControls').classList.add('hidden');
                 } else {
-                    mostrarFeedback('❌ Erro ao resetar: ' + (resultado.erro || 'desconhecido'), '#f44336');
+                    mostrarFeedback('❌ Erro: ' + (resultado.erro || 'desconhecido'), '#f44336');
                 }
             } catch (e) {
-                console.error('Erro ao resetar ranking:', e);
-                mostrarFeedback('❌ Erro de conexão ao resetar ranking', '#f44336');
+                mostrarFeedback('❌ Erro de conexão', '#f44336');
             }
         };
 
@@ -699,35 +662,30 @@
             const senha = document.getElementById('adminPassword').value;
             if (senha === SENHA_ADMIN) {
                 document.getElementById('resetControls').classList.remove('hidden');
-                mostrarFeedback('✅ Senha correta! Controles de reset liberados.', '#4CAF50');
+                mostrarFeedback('✅ Senha correta!', '#4CAF50');
             } else {
-                mostrarFeedback('❌ Senha incorreta! Acesso negado.', '#f44336');
+                mostrarFeedback('❌ Senha incorreta!', '#f44336');
                 document.getElementById('resetControls').classList.add('hidden');
             }
         };
 
-        // ========== FUNÇÕES DO JOGO ==========
         window.login = function() {
             const turma = document.getElementById('turma').value;
             const codigo = document.getElementById('codigo').value.trim().toUpperCase();
-            
             if (!/^CA[A-Z0-9]{1,3}26\d{2}$/.test(codigo)) {
                 document.getElementById('loginError').innerText = '❌ Código inválido! Ex: CA6A2601';
                 return;
             }
-            
             jogador = { codigo, turma };
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.remove('hidden');
             document.getElementById('codigoDisplay').innerText = codigo;
-            
             ativo = true;
             nivel = 1;
             vidas = 3;
             acertos = 0;
             total = 0;
             temposRespostas = [];
-            
             atualizarVidas();
             atualizarNivel();
             carregarRankings();
@@ -737,20 +695,17 @@
         function proximaPergunta() {
             if (!ativo) return;
             if (timerId) clearInterval(timerId);
-            
             const n1 = Math.floor(Math.random() * 11);
             const n2 = Math.floor(Math.random() * 11);
             resposta = n1 * n2;
             document.getElementById('question').innerHTML = `${n1} x ${n2} = ?`;
             document.getElementById('answer').value = '';
             document.getElementById('answer').focus();
-            
             tempo = temposNivel[nivel];
             inicioPergunta = Date.now();
             document.getElementById('timerText').innerHTML = `⏱️ Tempo: ${tempo}s`;
             document.getElementById('timerBar').style.width = '100%';
             document.getElementById('timerBar').classList.remove('warning');
-            
             timerId = setInterval(() => {
                 if (!ativo) return;
                 tempo--;
@@ -775,22 +730,15 @@
             }
         });
 
-        document.getElementById('turma').addEventListener('change', function() {
-            carregarRankings();
-        });
-
         window.checkAnswer = function() {
             if (!ativo) return;
-            
             let user = parseInt(document.getElementById('answer').value);
             total++;
-            
             if (user === resposta) {
                 temposRespostas.push((Date.now() - inicioPergunta) / 1000);
                 acertos++;
                 mostrarFeedback('✅ Correto!', '#4CAF50');
                 clearInterval(timerId);
-                
                 if (total % 5 === 0 && nivel < 5) {
                     nivel++;
                     atualizarNivel();
@@ -828,7 +776,6 @@
         function calcularEficiencia() {
             let taxaAcertos = total > 0 ? (acertos / total) * 60 : 0;
             let bonusVelocidade = 0;
-            
             if (temposRespostas.length > 0) {
                 let tempoMedio = temposRespostas.reduce((a, b) => a + b, 0) / temposRespostas.length;
                 let tempoMax = temposNivel[nivel];
@@ -841,12 +788,9 @@
         async function gameOver() {
             ativo = false;
             if (timerId) clearInterval(timerId);
-            
             let eficiencia = calcularEficiencia();
             await salvarPontuacao(jogador.codigo, jogador.turma, nivel, eficiencia);
-            
             let tempoMedio = temposRespostas.length > 0 ? (temposRespostas.reduce((a, b) => a + b, 0) / temposRespostas.length).toFixed(1) : 'N/A';
-            
             document.getElementById('gameStats').innerHTML = `
                 <p>📊 Acertos: ${acertos}/${total}</p>
                 <p>🏆 Nível: ${nivel}/5</p>
@@ -855,9 +799,7 @@
                 <p>💀 Vidas: ${vidas}/3</p>
                 <hr>
                 <p>✅ Pontuação salva! Veja os rankings atualizados!</p>
-                <p style="font-size:11px">🏫 Sua turma também compete no ranking de turmas!</p>
             `;
-            
             document.getElementById('gameScreen').classList.add('hidden');
             document.getElementById('gameOverScreen').classList.remove('hidden');
             await carregarRankings();
@@ -875,6 +817,7 @@
             resetGame();
         }
 
+        // Inicializar
         carregarRankings();
     </script>
 </body>
