@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🏆 Desafio da Tabuada - Rankings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #5f27cd 0%, #341f97 100%);
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .lives {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 10px 0;
+            font-size: 28px;
+        }
+
+        .level-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 40px;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .question-area {
+            padding: 25px 20px;
+            text-align: center;
+        }
+
+        .question {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 15px 0;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        #answer {
+            padding: 12px 20px;
+            font-size: 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            width: 160px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        #answer:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .timer-bar-container {
+            background: #e0e0e0;
+            height: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 20px;
+        }
+
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #00b09b, #96c93d);
+            transition: width 0.1s linear;
+        }
+
+        .timer-bar.warning {
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+        }
+
+        .timer-text {
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        /* RANKINGS - 2 COLUNAS */
+        .rankings-container {
+            display: flex;
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            flex-wrap: wrap;
+        }
+
+        .ranking-box {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .ranking-box h3 {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .ranking-box h3 span {
+            color: #ffd700;
+        }
+
+        .ranking-content {
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .ranking-table th,
+        .ranking-table td {
+            padding: 10px 6px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .ranking-table th {
+            background: #f0f0f0;
+            color: #333;
+            position: sticky;
+            top: 0;
+            font-size: 11px;
+        }
+
+        /* LOGIN */
+        .login-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        .error-message {
+            color: #f5576c;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .stats {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        .feedback {
+            position: fixed;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            z-index: 1000;
+            font-size: 16px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .badge-turma {
+            background: #FF9800;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 15px;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        .first-place {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            font-weight: bold;
+        }
+
+        .reset-panel {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #f5576c, #f093fb);
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .admin-panel {
+            background: #fff3e0;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 10px;
+            border: 1px solid #ffcc80;
+        }
+
+        .admin-input {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .admin-input input {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+        }
+
+        .admin-input button {
+            padding: 8px 15px;
+            font-size: 12px;
+            background: linear-gradient(135deg, #f5576c, #f093fb);
+            width: auto;
+        }
+
+        .small-text {
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 700px) {
+            .rankings-container {
+                flex-direction: column;
+            }
+            .question {
+                font-size: 36px;
+            }
+            button {
+                padding: 10px 20px;
+            }
+        }
+
+        .ranking-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .ranking-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .ranking-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- TELA DE LOGIN COM RANKING -->
+        <div id="loginScreen">
+            <div class="header">
+                <h1>🏆 DESAFIO DA TABUADA</h1>
+                <p>⚡ Responda rápido, acerte mais e entre para o TOP 10! ⚡</p>
+            </div>
+
+            <!-- RANKINGS NA TELA DE LOGIN -->
+            <div class="rankings-container">
+                <div class="ranking-box">
+                    <h3>🌍 TOP 10 DA <span>ESCOLA</span> 🌍</h3>
+                    <div class="ranking-content" id="loginRankingGlobal">
+                        <p style="text-align:center;padding:20px;">🏆 Carregando ranking...</p>
+                    </div>
+                </div>
+                <div class="ranking-box">
+                    <h3>🏫 TOP 10 <span>TURMAS</span> 🏫</h3>
+                    <div class="ranking-content" id="loginRankingTurmas">
+                        <p style="text-align:center;padding:20px;">🏆 Calculando...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAINEL DE RESET DO RANKING -->
+            <div class="reset-panel">
+                <button onclick="toggleAdminPanel()" class="reset-btn">🔧 ADMIN - Resetar Ranking 🔧</button>
+                <div id="adminPanel" class="admin-panel hidden">
+                    <div class="admin-input">
+                        <input type="password" id="adminPassword" placeholder="Digite a senha de admin">
+                        <button onclick="verificarSenhaReset()">🔓 Verificar</button>
+                    </div>
+                    <div id="resetControls" class="hidden" style="margin-top: 10px;">
+                        <button onclick="resetRanking()" style="background: linear-gradient(135deg, #f44336, #d32f2f); width: 100%;">
+                            ⚠️ CONFIRMAR RESET TOTAL DO RANKING ⚠️
+                        </button>
+                        <p class="small-text">⚠️ Esta ação irá apagar TODAS as pontuações e rankings permanentemente!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ÁREA DE LOGIN -->
+            <div class="login-area">
+                <div class="form-group">
+                    <label>📚 Sua Turma / Sala</label>
+                    <select id="turma">
+                        <option>6º Ano A</option>
+                        <option>6º Ano B</option>
+                        <option>7º Ano A</option>
+                        <option>7º Ano B</option>
+                        <option>8º Ano A</option>
+                        <option>8º Ano B</option>
+                        <option>9º Ano A</option>
+                        <option>9º Ano B</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>🔑 Seu Código (ex: CA6A2601)</label>
+                    <input type="text" id="codigo" placeholder="CA6A2601" maxlength="10">
+                    <div class="error-message" id="loginError"></div>
+                </div>
+                <button onclick="login()" class="btn-login">🎮 ENTRAR E JOGAR 🎮</button>
+                <p style="text-align:center; font-size:11px; margin-top:12px; color:#666;">
+                    💡 Quanto mais rápido você responder, maior sua eficiência!<br>
+                    🔥 O ranking de turmas é calculado pela média dos melhores alunos!
+                </p>
+            </div>
+        </div>
+
+        <!-- TELA DO JOGO -->
+        <div id="gameScreen" class="hidden">
+            <div class="header">
+                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <span class="level-badge" id="levelDisplay">Nível 1</span>
+                    <span class="level-badge" id="codigoDisplay"></span>
+                </div>
+                <div class="lives" id="livesDisplay">❤️ ❤️ ❤️</div>
+            </div>
+            <div class="timer-bar-container">
+                <div class="timer-text" id="timerText">⏱️ Tempo: 60s</div>
+                <div class="timer-bar" id="timerBar"></div>
+            </div>
+            <div class="question-area">
+                <div class="question" id="question">5 x 3 = ?</div>
+                <div class="input-area">
+                    <input type="number" id="answer" placeholder="?" autocomplete="off">
+                    <button onclick="checkAnswer()">✅ Responder</button>
+                </div>
+            </div>
+            <div class="rankings-container">
+                <div class="ranking-box">
+                    <h3>🌍 TOP 10 DA <span>ESCOLA</span> 🌍</h3>
+                    <div class="ranking-content" id="rankingGlobalList">
+                        <p style="text-align:center;padding:20px;">🏆 Carregando...</p>
+                    </div>
+                </div>
+                <div class="ranking-box">
+                    <h3>🏫 TOP 10 <span>TURMAS</span> 🏫</h3>
+                    <div class="ranking-content" id="rankingTurmasList">
+                        <p style="text-align:center;padding:20px;">🏆 Calculando...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA GAME OVER -->
+        <div id="gameOverScreen" class="hidden">
+            <div class="game-over">
+                <div class="header" style="border-radius: 0">
+                    <h2>💀 GAME OVER 💀</h2>
+                </div>
+                <div class="stats" id="gameStats"></div>
+                <div style="display: flex; gap: 10px; padding: 20px">
+                    <button onclick="resetGame()" style="flex:1">🔄 Jogar Novamente</button>
+                    <button onclick="logout()" style="flex:1">🏠 Sair</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // NOVO LINK DO APPS SCRIPT ATUALIZADO
+        const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbz_D8hUJ-lKrsXca0AflIVJ_qo_Wa4oeeImsU7aNRqEU408NNUJIYmRoBRL8Pc-o5rj/exec';
+
+        let jogador = {},
+            ativo = false,
+            nivel = 1,
+            vidas = 3,
+            acertos = 0,
+            total = 0,
+            tempo = 60,
+            timerId = null,
+            resposta = 0,
+            temposRespostas = [],
+            inicioPergunta = 0;
+
+        const temposNivel = {
+            1: 60,
+            2: 30,
+            3: 20,
+            4: 15,
+            5: 10
+        };
+
+        // ========== FUNÇÃO PARA CALCULAR TOP TURMAS ==========
+        function calcularTopTurmas(dados) {
+            const turmas = {};
+            
+            dados.forEach(aluno => {
+                if (!turmas[aluno.turma]) {
+                    turmas[aluno.turma] = [];
+                }
+                turmas[aluno.turma].push(aluno.eficiencia);
+            });
+            
+            const rankingTurmas = [];
+            for (const [turma, eficiencias] of Object.entries(turmas)) {
+                eficiencias.sort((a, b) => b - a);
+                const top5 = eficiencias.slice(0, 5);
+                const media = top5.reduce((a, b) => a + b, 0) / top5.length;
+                rankingTurmas.push({
+                    turma: turma,
+                    media: Math.round(media),
+                    totalAlunos: eficiencias.length,
+                    topAlunos: top5.length
+                });
+            }
+            
+            rankingTurmas.sort((a, b) => b.media - a.media);
+            return rankingTurmas;
+        }
+
+        // ========== RANKING GLOBAL ==========
+        function exibirRankingGlobal(containerId, dados, isJogo = false) {
+            const container = document.getElementById(containerId);
+            if (!dados || !dados.length) {
+                container.innerHTML = '<p style="text-align:center;padding:20px;">🌍 Nenhuma pontuação na escola!</p>';
+                return;
+            }
+            
+            const dadosOrdenados = [...dados].sort((a, b) => b.eficiencia - a.eficiencia);
+            let html = '<table class="ranking-table"><thead><tr><th>🏆</th><th>CÓDIGO</th><th>SALA</th><th>NÍVEL</th><th>%</th></tr></thead><tbody>';
+            
+            dadosOrdenados.slice(0, 10).forEach((item, i) => {
+                const souEu = (isJogo && item.codigo === jogador.codigo);
+                let medalha = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`;
+                let cor = item.eficiencia >= 80 ? '#4CAF50' : item.eficiencia >= 50 ? '#FF9800' : '#f44336';
+                
+                html += `<tr style="${souEu ? 'background:#E3F2FD; font-weight:bold' : ''} ${i === 0 ? 'first-place' : ''}">
+                    <td style="text-align:center">${medalha}</td>
+                    <td><strong>${item.codigo}</strong>${souEu ? ' 📍' : ''}</td>
+                    <td><span class="badge-turma">${item.turma}</span></span></td>
+                    <td>${item.nivel}/5 ${'⭐'.repeat(item.nivel)}</span></td>
+                    <td style="color:${cor}; font-weight:bold">${item.eficiencia}%</span></td>
+                </table>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // ========== RANKING TURMAS ==========
+        function exibirRankingTurmas(containerId, dados, isJogo = false) {
+            const container = document.getElementById(containerId);
+            const rankingTurmas = calcularTopTurmas(dados);
+            
+            if (!rankingTurmas.length) {
+                container.innerHTML = '<p style="text-align:center;padding:20px;">🏫 Nenhuma turma registrada!</p>';
+                return;
+            }
+            
+            let html = '<table class="ranking-table"><thead><tr><th>🏆</th><th>TURMA</th><th>MÉDIA</th><th>ALUNOS</th><th>TOP</th></tr></thead><tbody>';
+            
+            rankingTurmas.slice(0, 10).forEach((item, i) => {
+                let medalha = '';
+                if (i === 0) medalha = '🥇';
+                else if (i === 1) medalha = '🥈';
+                else if (i === 2) medalha = '🥉';
+                else medalha = `${i + 1}º`;
+                
+                let cor = item.media >= 80 ? '#4CAF50' : item.media >= 60 ? '#FF9800' : '#f44336';
+                let estrelas = item.media >= 90 ? '⭐⭐⭐' : item.media >= 75 ? '⭐⭐' : '⭐';
+                const destaque = (isJogo && item.turma === jogador.turma) ? 'background:#E3F2FD; font-weight:bold;' : '';
+                
+                html += `<tr style="${destaque} ${i === 0 ? 'first-place' : ''}">
+                    <td style="text-align:center; font-size:16px;">${medalha}</td>
+                    <td><strong>${item.turma}</strong>${(isJogo && item.turma === jogador.turma) ? ' 📍' : ''}</td>
+                    <td style="color:${cor}; font-weight:bold; font-size:14px;">${item.media}% ${estrelas}</td>
+                    <td>📊 ${item.totalAlunos}</td>
+                    <td>🏅 ${item.topAlunos}/5</span></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // ========== FUNÇÕES DE CARREGAMENTO ==========
+        async function carregarRankings() {
+            try {
+                const resposta = await fetch(`${URL_APPS_SCRIPT}?acao=get`);
+                const dados = await resposta.json();
+                
+                if (dados && dados.length) {
+                    exibirRankingGlobal('loginRankingGlobal', dados, false);
+                    exibirRankingGlobal('rankingGlobalList', dados, true);
+                    exibirRankingTurmas('loginRankingTurmas', dados, false);
+                    exibirRankingTurmas('rankingTurmasList', dados, true);
+                } else {
+                    document.getElementById('loginRankingGlobal').innerHTML = '<p style="text-align:center;padding:20px;">🌍 Nenhuma pontuação ainda! Seja o primeiro!</p>';
+                    document.getElementById('loginRankingTurmas').innerHTML = '<p style="text-align:center;padding:20px;">🏫 Nenhuma turma registrada!</p>';
+                    document.getElementById('rankingGlobalList').innerHTML = '<p style="text-align:center;padding:20px;">🌍 Nenhuma pontuação ainda!</p>';
+                    document.getElementById('rankingTurmasList').innerHTML = '<p style="text-align:center;padding:20px;">🏫 Nenhuma turma registrada!</p>';
+                }
+            } catch (e) {
+                console.error('Erro ao carregar rankings:', e);
+                document.getElementById('loginRankingGlobal').innerHTML = '<p style="text-align:center;padding:20px;">⚠️ Erro de conexão! Verifique a URL do Apps Script.</p>';
+                document.getElementById('loginRankingTurmas').innerHTML = '<p style="text-align:center;padding:20px;">⚠️ Erro ao carregar rankings.</p>';
+            }
+        }
+
+        async function salvarPontuacao(codigo, turma, nivel, eficiencia) {
+            try {
+                await fetch(URL_APPS_SCRIPT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ codigo, turma, nivel, eficiencia })
+                });
+                mostrarFeedback('✅ Pontuação salva! Rankings atualizados!', '#4CAF50');
+                await carregarRankings();
+            } catch (e) {
+                console.error('Erro ao salvar:', e);
+                mostrarFeedback('⚠️ Erro ao salvar pontuação', '#f44336');
+            }
+        }
+
+        function mostrarFeedback(msg, cor) {
+            let d = document.createElement('div');
+            d.className = 'feedback';
+            d.textContent = msg;
+            d.style.backgroundColor = cor;
+            document.body.appendChild(d);
+            setTimeout(() => d.remove(), 2000);
+        }
+
+        // FUNÇÕES PARA RESET DO RANKING
+        const SENHA_ADMIN = "admin123";
+
+        window.resetRanking = async function() {
+            if (!confirm('⚠️ ATENÇÃO! Isso irá apagar TODAS as pontuações de TODOS os jogadores! Esta ação é irreversível! ⚠️\n\nTem certeza que deseja continuar?')) {
+                return;
+            }
+            
+            const confirmacao = prompt('Digite "RESETAR" para confirmar o reset total do ranking:');
+            if (confirmacao !== 'RESETAR') {
+                mostrarFeedback('❌ Reset cancelado - confirmação incorreta', '#f44336');
+                return;
+            }
+            
+            try {
+                mostrarFeedback('🔄 Resetando ranking... Aguarde...', '#FF9800');
+                
+                const resposta = await fetch(`${URL_APPS_SCRIPT}?acao=reset&senha=${SENHA_ADMIN}`);
+                const resultado = await resposta.json();
+                
+                if (resultado.sucesso) {
+                    mostrarFeedback('✅ Ranking resetado com sucesso!', '#4CAF50');
+                    await carregarRankings();
+                    document.getElementById('adminPanel').classList.add('hidden');
+                    document.getElementById('resetControls').classList.add('hidden');
+                } else {
+                    mostrarFeedback('❌ Erro ao resetar: ' + (resultado.erro || 'desconhecido'), '#f44336');
+                }
+            } catch (e) {
+                console.error('Erro ao resetar ranking:', e);
+                mostrarFeedback('❌ Erro de conexão ao resetar ranking', '#f44336');
+            }
+        };
+
+        window.toggleAdminPanel = function() {
+            const panel = document.getElementById('adminPanel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('resetControls').classList.add('hidden');
+            }
+        };
+
+        window.verificarSenhaReset = function() {
+            const senha = document.getElementById('adminPassword').value;
+            if (senha === SENHA_ADMIN) {
+                document.getElementById('resetControls').classList.remove('hidden');
+                mostrarFeedback('✅ Senha correta! Controles de reset liberados.', '#4CAF50');
+            } else {
+                mostrarFeedback('❌ Senha incorreta! Acesso negado.', '#f44336');
+                document.getElementById('resetControls').classList.add('hidden');
+            }
+        };
+
+        // ========== FUNÇÕES DO JOGO ==========
+        window.login = function() {
+            const turma = document.getElementById('turma').value;
+            const codigo = document.getElementById('codigo').value.trim().toUpperCase();
+            
+            if (!/^CA[A-Z0-9]{1,3}26\d{2}$/.test(codigo)) {
+                document.getElementById('loginError').innerText = '❌ Código inválido! Ex: CA6A2601';
+                return;
+            }
+            
+            jogador = { codigo, turma };
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('codigoDisplay').innerText = codigo;
+            
+            ativo = true;
+            nivel = 1;
+            vidas = 3;
+            acertos = 0;
+            total = 0;
+            temposRespostas = [];
+            
+            atualizarVidas();
+            atualizarNivel();
+            carregarRankings();
+            proximaPergunta();
+        };
+
+        function proximaPergunta() {
+            if (!ativo) return;
+            if (timerId) clearInterval(timerId);
+            
+            const n1 = Math.floor(Math.random() * 11);
+            const n2 = Math.floor(Math.random() * 11);
+            resposta = n1 * n2;
+            document.getElementById('question').innerHTML = `${n1} x ${n2} = ?`;
+            document.getElementById('answer').value = '';
+            document.getElementById('answer').focus();
+            
+            tempo = temposNivel[nivel];
+            inicioPergunta = Date.now();
+            document.getElementById('timerText').innerHTML = `⏱️ Tempo: ${tempo}s`;
+            document.getElementById('timerBar').style.width = '100%';
+            document.getElementById('timerBar').classList.remove('warning');
+            
+            timerId = setInterval(() => {
+                if (!ativo) return;
+                tempo--;
+                document.getElementById('timerText').innerHTML = `⏱️ Tempo: ${tempo}s`;
+                let p = (tempo / temposNivel[nivel]) * 100;
+                document.getElementById('timerBar').style.width = `${Math.max(0, p)}%`;
+                if (p < 30) document.getElementById('timerBar').classList.add('warning');
+                else document.getElementById('timerBar').classList.remove('warning');
+                if (tempo <= 0) {
+                    clearInterval(timerId);
+                    perderVida('⏰ Tempo!');
+                }
+            }, 1000);
+        }
+
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (!document.getElementById('gameScreen').classList.contains('hidden')) {
+                    checkAnswer();
+                }
+            }
+        });
+
+        document.getElementById('turma').addEventListener('change', function() {
+            carregarRankings();
+        });
+
+        window.checkAnswer = function() {
+            if (!ativo) return;
+            
+            let user = parseInt(document.getElementById('answer').value);
+            total++;
+            
+            if (user === resposta) {
+                temposRespostas.push((Date.now() - inicioPergunta) / 1000);
+                acertos++;
+                mostrarFeedback('✅ Correto!', '#4CAF50');
+                clearInterval(timerId);
+                
+                if (total % 5 === 0 && nivel < 5) {
+                    nivel++;
+                    atualizarNivel();
+                    mostrarFeedback(`⭐ NÍVEL ${nivel}! ⭐`, '#FF9800');
+                }
+                proximaPergunta();
+            } else {
+                document.getElementById('answer').classList.add('shake');
+                setTimeout(() => document.getElementById('answer').classList.remove('shake'), 300);
+                mostrarFeedback(`❌ Era ${resposta}`, '#f44336');
+                perderVida('Errou!');
+            }
+        };
+
+        function perderVida(m) {
+            vidas--;
+            atualizarVidas();
+            if (vidas <= 0) gameOver();
+            else {
+                clearInterval(timerId);
+                proximaPergunta();
+            }
+        }
+
+        function atualizarVidas() {
+            let h = '';
+            for (let i = 0; i < 3; i++) h += i < vidas ? '❤️ ' : '🖤 ';
+            document.getElementById('livesDisplay').innerHTML = h;
+        }
+
+        function atualizarNivel() {
+            document.getElementById('levelDisplay').innerHTML = `Nível ${nivel} - ${temposNivel[nivel]}s`;
+        }
+
+        function calcularEficiencia() {
+            let taxaAcertos = total > 0 ? (acertos / total) * 60 : 0;
+            let bonusVelocidade = 0;
+            
+            if (temposRespostas.length > 0) {
+                let tempoMedio = temposRespostas.reduce((a, b) => a + b, 0) / temposRespostas.length;
+                let tempoMax = temposNivel[nivel];
+                let proporcao = Math.max(0, Math.min(1, (tempoMax - tempoMedio) / tempoMax));
+                bonusVelocidade = proporcao * 40;
+            }
+            return Math.min(100, Math.floor(taxaAcertos + bonusVelocidade));
+        }
+
+        async function gameOver() {
+            ativo = false;
+            if (timerId) clearInterval(timerId);
+            
+            let eficiencia = calcularEficiencia();
+            await salvarPontuacao(jogador.codigo, jogador.turma, nivel, eficiencia);
+            
+            let tempoMedio = temposRespostas.length > 0 ? (temposRespostas.reduce((a, b) => a + b, 0) / temposRespostas.length).toFixed(1) : 'N/A';
+            
+            document.getElementById('gameStats').innerHTML = `
+                <p>📊 Acertos: ${acertos}/${total}</p>
+                <p>🏆 Nível: ${nivel}/5</p>
+                <p>⚡ Eficiência: <span style="font-size:28px;color:${eficiencia >= 80 ? '#4CAF50' : eficiencia >= 50 ? '#FF9800' : '#f44336'}">${eficiencia}%</span></p>
+                <p>⏱️ Tempo médio: ${tempoMedio} segundos</p>
+                <p>💀 Vidas: ${vidas}/3</p>
+                <hr>
+                <p>✅ Pontuação salva! Veja os rankings atualizados!</p>
+                <p style="font-size:11px">🏫 Sua turma também compete no ranking de turmas!</p>
+            `;
+            
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+            await carregarRankings();
+        }
+
+        function resetGame() {
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('codigo').value = '';
+            if (timerId) clearInterval(timerId);
+            carregarRankings();
+        }
+
+        function logout() {
+            resetGame();
+        }
+
+        carregarRankings();
+    </script>
+</body>
+</html>
